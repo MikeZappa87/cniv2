@@ -1,0 +1,185 @@
+syntax = "proto3";
+
+package cni;
+
+option go_package = "pkg/types;cni";
+
+service CNI {
+    // MVP
+    rpc AddAttachment(AddAttachmentRequest) returns (AddAttachmentResponse) {}
+    // MVP
+    rpc DeleteAttachment(DeleteAttachmentRequest) returns (DeleteAttachmentResponse) {}
+
+    rpc RegisterNetwork(NetworkRegistrationRequest) returns (NetworkRegistrationResponse) {}
+}
+
+message AddAttachmentRequest {
+    string ifname = 1; //required
+    PodSandboxConfig sandboxconfig = 2; //required
+    map<string,string> extradata = 100;
+}
+
+message AddAttachmentResponse {
+    map<string, IPConfig> ipconfigs = 1;
+    repeated Route routes = 2;
+    map<string,string> extradata = 100;
+}
+
+message DeleteAttachmentRequest {
+    string ifname = 1;
+    PodSandboxConfig sandboxconfig = 2; //required
+    map<string,string> extradata = 100;
+}
+
+message DeleteAttachmentResponse {
+    map<string,string> extradata = 100;
+}
+
+message LinuxAttachmentConfig {
+    string netns_path = 1;
+    string cgroup_path = 2;
+    map<string,string> extradata = 100;
+}
+
+message WindowsAttachmentConfig {
+    map<string,string> extradata = 100;
+}
+
+message Route {
+    string Dst = 1;
+    string Gateway = 2;
+    string Dev = 3;
+    int32 MTU = 4;
+    int32 Scope = 5;
+    map<string,string> extradata = 100;
+}
+
+// DNSConfig specifies the DNS servers and search domains of a sandbox.
+message DNSConfig {
+    // List of DNS servers of the cluster.
+    repeated string servers = 1;
+    // List of DNS search domains of the cluster.
+    repeated string searches = 2;
+    // List of DNS options. See https://linux.die.net/man/5/resolv.conf
+    // for all available options.
+    repeated string options = 3;
+    map<string,string> extradata = 100;
+}
+
+message IPConfig {
+    repeated IP ip = 1;
+    string mac = 2;
+    map<string,string> extradata = 100;
+}
+
+enum IPFamily {
+    v4 = 0;
+    v6 = 1;
+}
+
+message IP {
+    string ip_address = 1;
+    string cidr = 2;
+    IPFamily family = 3;
+}
+
+message PodSandboxConfig {
+    PodSandboxMetadata metadata = 1;
+    LinuxAttachmentConfig LinuxConfig = 2;
+    WindowsAttachmentConfig WindowsConfig = 3;
+    map<string,string> labels = 4;
+    map<string,string> annotations = 5;
+    repeated PortMapping port_mappings = 6;
+    map<string,string> extradata = 100;
+}
+
+message PodSandboxMetadata {
+    // Pod name of the sandbox. Same as the pod name in the Pod ObjectMeta.
+    string name = 1;
+    // Pod UID of the sandbox. Same as the pod UID in the Pod ObjectMeta.
+    string uid = 2;
+    // Pod namespace of the sandbox. Same as the pod namespace in the Pod ObjectMeta.
+    string namespace = 3;
+    // Attempt number of creating the sandbox. Default: 0.
+    uint32 attempt = 4;
+}
+
+enum Protocol {
+    TCP = 0;
+    UDP = 1;
+    SCTP = 2;
+}
+
+// PortMapping specifies the port mapping configurations of a sandbox.
+message PortMapping {
+    // Protocol of the port mapping.
+    Protocol protocol = 1;
+    // Port number within the container. Default: 0 (not specified).
+    int32 container_port = 2;
+    // Port number on the host. Default: 0 (not specified).
+    int32 host_port = 3;
+    // Host IP.
+    string host_ip = 4;
+}
+
+message NetworkRegistrationRequest {
+    string name = 1;
+    map<string,string> labels = 2;
+    map<string, string> attachment_selector = 3;
+    DNSConfig dns = 4;
+    repeated Route routes = 5;
+    bool isdefault = 6;
+    //IPAM Information
+    map<string,string> extradata = 100;
+}
+
+message NetworkRegistrationResponse {
+    string id = 1;
+}
+
+message IPAM {
+    
+}
+
+message VerifyAttachmentRequest {
+
+}
+
+message VerifyAttachmentResponse {
+
+}
+
+message AttachmentStatusRequest {
+
+}
+
+message AttachmentStatusResponse {
+
+}
+
+message NetworkStatusRequest {
+
+}
+
+message NetworkStatusResponse {
+
+}
+
+message QueryNetworkRequest {
+
+}
+
+message QueryNetworkResponse {
+
+}
+
+
+/*
+
+    rpc RegisterNetwork(NetworkRequest) returns (NetworkResponse) {}
+    rpc VerifyAttachment(VerifyAttachmentRequest) returns (VerifyAttachmentResponse) {}
+    rpc AtachmentStatus(AttachmentStatusRequest) returns (AttachmentStatusResponse) {}
+    rpc NetworkStatus(NetworkStatusRequest) returns (NetworkStatusResponse) {}
+    rpc QueryNetwork(QueryNetworkRequest) returns (QueryNetworkResponse) {}
+
+*/
