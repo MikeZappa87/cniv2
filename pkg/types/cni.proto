@@ -90,6 +90,8 @@ message PodSandboxConfig {
     map<string,string> labels = 4;
     map<string,string> annotations = 5;
     repeated PortMapping port_mappings = 6;
+    DNSConfig dns = 7;
+    repeated Route routes = 8;
     map<string,string> extradata = 100;
 }
 
