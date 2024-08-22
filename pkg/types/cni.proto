@@ -9,13 +9,15 @@ service CNI {
     rpc AddAttachment(AddAttachmentRequest) returns (AddAttachmentResponse) {}
     // MVP
     rpc DeleteAttachment(DeleteAttachmentRequest) returns (DeleteAttachmentResponse) {}
-
+    //
+    rpc AttachmentStatus(AttachmentStatusRequest) returns (AttachmentStatusResponse) {}
+    //
     rpc RegisterNetwork(NetworkRegistrationRequest) returns (NetworkRegistrationResponse) {}
 }
 
 message AddAttachmentRequest {
     string ifname = 1; //required
-    PodSandboxConfig sandboxconfig = 2; //required
+    PodConfig podconfig = 2; //required
     map<string,string> extradata = 100;
 }
 
@@ -27,7 +29,7 @@ message AddAttachmentResponse {
 
 message DeleteAttachmentRequest {
     string ifname = 1;
-    PodSandboxConfig sandboxconfig = 2; //required
+    PodConfig podconfig = 2; //required
     map<string,string> extradata = 100;
 }
 
@@ -83,8 +85,8 @@ message IP {
     IPFamily family = 3;
 }
 
-message PodSandboxConfig {
-    PodSandboxMetadata metadata = 1;
+message PodConfig {
+    PodMetadata metadata = 1;
     LinuxAttachmentConfig LinuxConfig = 2;
     WindowsAttachmentConfig WindowsConfig = 3;
     map<string,string> labels = 4;
@@ -92,10 +94,11 @@ message PodSandboxConfig {
     repeated PortMapping port_mappings = 6;
     DNSConfig dns = 7;
     repeated Route routes = 8;
+    repeated IPAM ipam = 9;
     map<string,string> extradata = 100;
 }
 
-message PodSandboxMetadata {
+message PodMetadata {
     // Pod name of the sandbox. Same as the pod name in the Pod ObjectMeta.
     string name = 1;
     // Pod UID of the sandbox. Same as the pod UID in the Pod ObjectMeta.
@@ -131,57 +134,27 @@ message NetworkRegistrationRequest {
     DNSConfig dns = 4;
     repeated Route routes = 5;
     bool isdefault = 6;
-    //IPAM Information
+    repeated IPAM ipam = 7;
     map<string,string> extradata = 100;
 }
 
 message NetworkRegistrationResponse {
     string id = 1;
+    map<string,string> extradata = 100;
 }
 
 message IPAM {
-    
-}
-
-message VerifyAttachmentRequest {
-
-}
-
-message VerifyAttachmentResponse {
-
+    string Subnet = 1;
+    string gateway = 2;
+    string startrange = 3;
+    string endrange = 4;
+    map<string,string> extradata = 100;
 }
 
 message AttachmentStatusRequest {
-
+    map<string,string> extradata = 100;
 }
 
 message AttachmentStatusResponse {
-
+    map<string,string> extradata = 100;
 }
-
-message NetworkStatusRequest {
-
-}
-
-message NetworkStatusResponse {
-
-}
-
-message QueryNetworkRequest {
-
-}
-
-message QueryNetworkResponse {
-
-}
-
-
-/*
-
-    rpc RegisterNetwork(NetworkRequest) returns (NetworkResponse) {}
-    rpc VerifyAttachment(VerifyAttachmentRequest) returns (VerifyAttachmentResponse) {}
-    rpc AtachmentStatus(AttachmentStatusRequest) returns (AttachmentStatusResponse) {}
-    rpc NetworkStatus(NetworkStatusRequest) returns (NetworkStatusResponse) {}
-    rpc QueryNetwork(QueryNetworkRequest) returns (QueryNetworkResponse) {}
-
-*/

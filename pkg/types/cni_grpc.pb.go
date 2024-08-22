@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	CNI_AddAttachment_FullMethodName    = "/cni.CNI/AddAttachment"
 	CNI_DeleteAttachment_FullMethodName = "/cni.CNI/DeleteAttachment"
+	CNI_AttachmentStatus_FullMethodName = "/cni.CNI/AttachmentStatus"
 	CNI_RegisterNetwork_FullMethodName  = "/cni.CNI/RegisterNetwork"
 )
 
@@ -32,6 +33,7 @@ type CNIClient interface {
 	AddAttachment(ctx context.Context, in *AddAttachmentRequest, opts ...grpc.CallOption) (*AddAttachmentResponse, error)
 	// MVP
 	DeleteAttachment(ctx context.Context, in *DeleteAttachmentRequest, opts ...grpc.CallOption) (*DeleteAttachmentResponse, error)
+	AttachmentStatus(ctx context.Context, in *AttachmentStatusRequest, opts ...grpc.CallOption) (*AttachmentStatusResponse, error)
 	RegisterNetwork(ctx context.Context, in *NetworkRegistrationRequest, opts ...grpc.CallOption) (*NetworkRegistrationResponse, error)
 }
 
@@ -63,6 +65,16 @@ func (c *cNIClient) DeleteAttachment(ctx context.Context, in *DeleteAttachmentRe
 	return out, nil
 }
 
+func (c *cNIClient) AttachmentStatus(ctx context.Context, in *AttachmentStatusRequest, opts ...grpc.CallOption) (*AttachmentStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AttachmentStatusResponse)
+	err := c.cc.Invoke(ctx, CNI_AttachmentStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *cNIClient) RegisterNetwork(ctx context.Context, in *NetworkRegistrationRequest, opts ...grpc.CallOption) (*NetworkRegistrationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(NetworkRegistrationResponse)
@@ -81,6 +93,7 @@ type CNIServer interface {
 	AddAttachment(context.Context, *AddAttachmentRequest) (*AddAttachmentResponse, error)
 	// MVP
 	DeleteAttachment(context.Context, *DeleteAttachmentRequest) (*DeleteAttachmentResponse, error)
+	AttachmentStatus(context.Context, *AttachmentStatusRequest) (*AttachmentStatusResponse, error)
 	RegisterNetwork(context.Context, *NetworkRegistrationRequest) (*NetworkRegistrationResponse, error)
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedCNIServer) AddAttachment(context.Context, *AddAttachmentReque
 }
 func (UnimplementedCNIServer) DeleteAttachment(context.Context, *DeleteAttachmentRequest) (*DeleteAttachmentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAttachment not implemented")
+}
+func (UnimplementedCNIServer) AttachmentStatus(context.Context, *AttachmentStatusRequest) (*AttachmentStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AttachmentStatus not implemented")
 }
 func (UnimplementedCNIServer) RegisterNetwork(context.Context, *NetworkRegistrationRequest) (*NetworkRegistrationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegisterNetwork not implemented")
@@ -156,6 +172,24 @@ func _CNI_DeleteAttachment_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CNI_AttachmentStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AttachmentStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CNIServer).AttachmentStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CNI_AttachmentStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CNIServer).AttachmentStatus(ctx, req.(*AttachmentStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _CNI_RegisterNetwork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NetworkRegistrationRequest)
 	if err := dec(in); err != nil {
@@ -188,6 +222,10 @@ var CNI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteAttachment",
 			Handler:    _CNI_DeleteAttachment_Handler,
+		},
+		{
+			MethodName: "AttachmentStatus",
+			Handler:    _CNI_AttachmentStatus_Handler,
 		},
 		{
 			MethodName: "RegisterNetwork",
