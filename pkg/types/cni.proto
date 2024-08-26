@@ -95,6 +95,8 @@ message PodConfig {
     DNSConfig dns = 7;
     repeated Route routes = 8;
     repeated IPAM ipam = 9;
+    // TODO is config associated with the PodConfig or just the AddAttachment
+    AssociatedConfiguration config = 10;
     map<string,string> extradata = 100;
 }
 
@@ -157,4 +159,12 @@ message AttachmentStatusRequest {
 
 message AttachmentStatusResponse {
     map<string,string> extradata = 100;
+}
+
+// TODO better name, I am lacking here
+message AssociatedConfiguration {
+    string ApiVersion = 1;
+    string Kind = 2;
+    // We need the above to take bytes and convert it to a meaniful type
+    bytes raw = 3;
 }
